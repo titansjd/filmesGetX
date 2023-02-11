@@ -1,19 +1,35 @@
 import 'package:app_filmes/application/ui/messages/messages_mixin.dart';
 import 'package:app_filmes/models/genre_model.dart';
+import 'package:app_filmes/models/movie_model.dart';
 import 'package:app_filmes/services/genres/genres_service.dart';
 import 'package:get/get.dart';
 
+import '../../services/movies/movies_service.dart';
+
 class MoviesController extends GetxController with MessagesMixin {
   final GenresService _genresService;
+  final MoviesService _moviesService;
+
   final _message = Rxn<MessageModel>();
+
   final genres = <GenreModel>[].obs;
 
-  MoviesController({required GenresService genresService})
-      : _genresService = genresService;
+  final popularMovies = <MovieModel>[].obs;
+  final topRatedMovies = <MovieModel>[].obs;
+
+  var _popularMoviesOriginal = <MovieModel>[];
+  var _topRatedMoviesOriginal = <MovieModel>[];
+
+  final genreSelected = Rxn<GenreModel>();
+
+  MoviesController({
+    required GenresService genresService,
+    required MoviesService moviesService,
+  })  : _genresService = genresService,
+        _moviesService = moviesService;
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     messageListener(_message);
   }
@@ -25,9 +41,66 @@ class MoviesController extends GetxController with MessagesMixin {
     try {
       final genresData = await _genresService.getGenres();
       genres.assignAll(genresData);
-    } catch (e) {
+
+      final popularMoviesData = await _moviesService.getPopularMovies();
+
+      final topRatedMoviesData = await _moviesService.getTopRated();
+
+      popularMovies.assignAll(popularMoviesData);
+
+      _popularMoviesOriginal = popularMoviesData;
+      _topRatedMoviesOriginal = topRatedMoviesData;
+
+      topRatedMovies.assignAll(topRatedMoviesData);
+    } catch (e, s) {
+      print(e);
+      print(s);
+
       _message(MessageModel.error(
-          title: 'Erro', message: 'Erro ao buscar categorias'));
+          title: 'Erro', message: 'Erro ao carregar dados da pagina'));
+    }
+  }
+
+  void filterByName(String title) {
+    if (title.isNotEmpty) {
+      var newPopularMovies = _popularMoviesOriginal.where((movie) {
+        return movie.title.toLowerCase().contains(title.toLowerCase());
+      });
+
+      var newTopRatedMovies = _topRatedMoviesOriginal.where((movie) {
+        return movie.title.toLowerCase().contains(title.toLowerCase());
+      });
+
+      popularMovies.assignAll(newPopularMovies);
+      topRatedMovies.assignAll(newTopRatedMovies);
+    } else {
+      popularMovies.assignAll(_popularMoviesOriginal);
+      topRatedMovies.assignAll(_topRatedMoviesOriginal);
+    }
+  }
+
+  void filterMoviesByGenre(GenreModel? genreModel) {
+    var genreFilter = genreModel;
+
+    if (genreFilter?.id == genreSelected.value?.id) {
+      genreFilter = null;
+    }
+
+    genreSelected.value = genreFilter;
+
+    if (genreFilter != null) {
+      var newPopularMovies = _popularMoviesOriginal.where((movie) {
+        return movie.genres.contains(genreModel?.id);
+      });
+
+      var newTopRatedMovies = _topRatedMoviesOriginal.where((movie) {
+        return movie.genres.contains(genreModel?.id);
+      });
+      popularMovies.assignAll(newPopularMovies);
+      topRatedMovies.assignAll(newTopRatedMovies);
+    } else {
+      popularMovies.assignAll(_popularMoviesOriginal);
+      topRatedMovies.assignAll(_topRatedMoviesOriginal);
     }
   }
 }
