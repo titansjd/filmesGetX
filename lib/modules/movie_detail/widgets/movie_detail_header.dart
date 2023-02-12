@@ -14,18 +14,19 @@ class MovieDetailHeader extends StatelessWidget {
       return SizedBox(
         height: 278,
         child: ListView.builder(
+          scrollDirection: Axis.horizontal,
           itemCount: movieData.urlImages.length,
           itemBuilder: ((context, index) {
             final image = movieData.urlImages[index];
             return Padding(
-              padding: EdgeInsets.all(2.0),
-              child: Image.network(image),
+              padding: const EdgeInsets.all(2.0),
+              child: Image.network(image, fit: BoxFit.cover),
             );
           }),
         ),
       );
     } else {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
   }
 }

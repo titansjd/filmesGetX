@@ -45,7 +45,7 @@ class MovieDetailModel {
     var urlImagesPosters = map['images']['posters'];
     var urlImages = urlImagesPosters
             ?.map<String>(
-                (i) => 'https:image.tmdb.org/t/p/w200${i['file_path']}')
+                (i) => 'https://image.tmdb.org/t/p/w200${i['file_path']}')
             .toList() ??
         [];
 

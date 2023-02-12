@@ -17,10 +17,19 @@ class MovieCast extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              cast?.image ?? '',
+              scale: 1.0,
+              cast!.image,
               width: 85,
               height: 85,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/no_image.jpg',
+                  fit: BoxFit.fill,
+                  width: 85,
+                  height: 85,
+                );
+              },
             ),
           ),
           Text(

@@ -1,4 +1,3 @@
-import 'package:app_filmes/models/movie_detail_model.dart';
 import 'package:app_filmes/modules/movie_detail/widgets/movie_detail_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
